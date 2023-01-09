@@ -82,7 +82,7 @@ matching denote files."
   "Sets `tabulated-list-entries' to a function that maps currently
 displayed denote file names
 matching the value of `denote-menu-current-regex' to a tabulated
-list entry following the defined form."
+list entry following the defined form. Then updates the buffer."
   (if tabulated-list-entries
       (progn
         (let
@@ -96,7 +96,9 @@ list entry following the defined form."
           (lambda ()
             (let ((matching-denote-files
                    (denote-directory-files-matching-regexp denote-menu-current-regex)))
-              (mapcar #'denote-menu--path-to-entry matching-denote-files))))))
+              (mapcar #'denote-menu--path-to-entry matching-denote-files)))))
+
+  (revert-buffer))
 
 (defun denote-menu--entries-to-filenames ()
   "Returns a list of the file names of the Denote files currenty
@@ -149,13 +151,14 @@ a denote file has a title based on the following rule derived from the file nami
       (propertize "(No Title)" 'face 'font-lock-comment-face)
     (denote-retrieve-filename-title path)))
 
-(defun denote-menu-filter (regex)
-  "Filters the `tabulated-list-entries' with denote files whose name
-matches REGEX and reverts the *Denotes* buffer to reflect the
+(defun denote-menu-filter ()
+  "Prompts for a regex and filters the `tabulated-list-entries' with
+denote files that match and reverts the *Denotes* buffer to
+reflect the
 changes."
-  (setq denote-menu-current-regex regex)
-  (denote-menu-update-entries)
-  (revert-buffer))
+  (interactive)
+  (setq denote-menu-current-regex (read-regexp "Filter regex: "))
+  (denote-menu-update-entries))
 
 (defun denote-menu-filter-by-keyword ()
   "Prompts for keywords and filters the list for denote files tagged
@@ -164,8 +167,7 @@ with the input keywords."
   (let* ((keywords (denote-keywords-prompt))
          (regex (concat "\\(" (mapconcat (lambda (keyword) (format "_%s" keyword)) keywords "\\|") "\\)")))
     (setq denote-menu-current-regex regex)
-    (denote-menu-update-entries)
-    (revert-buffer)))
+    (denote-menu-update-entries)))
     
 (defun denote-menu-clear-filters ()
   "Resets `denote-menu-current-regex' to be
@@ -173,8 +175,7 @@ with the input keywords."
   (interactive)
   (setq denote-menu-current-regex denote-menu-initial-regex)
   (setq tabulated-list-entries nil)
-  (denote-menu-update-entries)
-  (revert-buffer))
+  (denote-menu-update-entries) )
 
 (defun denote-menu-export-to-dired ()
   "Switches to a dired buffer showing `denote-directory' with the
@@ -184,14 +185,13 @@ files marked."
   (let ((files-to-mark (denote-menu--entries-to-filenames)))
     (dired denote-directory)
     (revert-buffer)
+    (dired-unmark-all-marks)
     (dired-mark-if
      (and (not (looking-at-p dired-re-dot))
 	  (not (eolp))			; empty line
 	  (let ((fn (dired-get-filename t t)))
             (and fn (member fn files-to-mark))))
      "matching file")))
-
-  
 
 (define-derived-mode denote-menu-mode tabulated-list-mode "Denote Menu"
   "Major mode for browsing a list of Denote files."
@@ -200,10 +200,6 @@ files marked."
                                 ("Title" ,denote-menu-title-column-width nil)
                                 ("Keywords" ,denote-menu-keywords-column-width nil)])
 
-  (define-key denote-menu-mode-map (kbd "c") #'denote-menu-clear-filters)
-  (define-key denote-menu-mode-map (kbd "/ r") #'denote-menu-filter)
-  (define-key denote-menu-mode-map (kbd "/ k") #'denote-menu-filter-by-keyword)
-  (define-key denote-menu-mode-map (kbd "e") #'denote-menu-export-to-dired)
   (denote-menu-update-entries)
   (setq tabulated-list-sort-key '("Date" . t))
   (tabulated-list-init-header)
