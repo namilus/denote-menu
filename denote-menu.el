@@ -1,7 +1,5 @@
 ;;; denote-menu.el --- View denote files in a tabulated list. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2023  Free Software Foundation, Inc.
-
 ;; Author: Mohamed Suliman <sulimanm@tcd.ie>
 ;; Version: 1.0.0
 ;; Package-Requires: ((emacs "28.1") (denote "1.2.0"))
