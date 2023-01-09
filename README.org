@@ -92,10 +92,10 @@ There are two ways to define your own filters:
    desired denote files, then your filter function would look something like the following:
    #+begin_src emacs-lisp
 (defun my/denote-menu-filter-custom ()
-  (let ((my-matching-denote-paths (do-some-filtering-of-tabulated-list-entries-blah-blah)))
-    (setq tabulated-list-entries (lambda () (mapcar #'denote-menu--path-to-entry my-matching-denote-files)))
+  (interactive)
+  (let ((my-matching-denote-paths '("/home/namilus/zettelkasten/20220719T135304--this-is-my-first-note__meta.org")))
+    (setq tabulated-list-entries (lambda () (mapcar #'denote-menu--path-to-entry my-matching-denote-paths)))
     (revert-buffer)))
-
    #+end_src
 ** Clearing filters
  To clear the filters and revert back to the
