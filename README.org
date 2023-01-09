@@ -124,8 +124,8 @@ The user options for =denote-menu= are:
   expression that is used to initially populate the =*Denote*= buffer
   with matching entries. This could allow for potential workflows such
   as having a dedicated buffer to display your journal denote files
-  (e.g those tagged with the "journal" keyword), etc. Defaults to
-  ="."=
+  (e.g those tagged with the "journal" keyword), etc. Defaults to the 
+  =.= regular expression.
 - =denote-menu-action= :: A function that takes as argument the
   current denote file path and performs an action on it. Defaults to
   =(lambda (path) (find-file path))=. This function is then called
