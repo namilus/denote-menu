@@ -103,7 +103,7 @@ list entry following the defined form. Then updates the buffer."
  presented in the *Denote* buffer."
   (mapcar (lambda (entry)
             (let ((id (car entry)))
-              (file-name-nondirectory (denote-get-path-by-id id))))
+              (file-name-nondirectory (denote-menu-get-path-by-id id))))
           (funcall tabulated-list-entries)))
 
 (defun denote-menu--entries-to-paths ()
