@@ -64,7 +64,8 @@ matching denote files."
 (defvar denote-menu-current-regex denote-menu-initial-regex
   "The current regex used to match denote filenames.")
 
-(defun list-denotes ()
+;;;###autoload
+(defun denote-menu-list-notes ()
   "Displays a list of the denote files located in
 `denote-directory'."
   (interactive)
@@ -75,6 +76,9 @@ matching denote files."
       (denote-menu-mode))
     
     (pop-to-buffer-same-window buffer)))
+
+(defalias 'denote-menu-list-notes 'list-denotes
+  "Alias of `denote-menu-list-notes' command.")
 
 (defun denote-menu-update-entries ()
   "Sets `tabulated-list-entries' to a function that maps currently
