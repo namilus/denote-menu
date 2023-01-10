@@ -44,6 +44,8 @@ configuration:
 (add-to-list 'load-path "~/path/to/cloned/denote-menu/")
 (require 'denote-menu)
 #+end_src
+
+This package requires Denote =v1.2.0= or above.
 * Usage
 Assuming that you have =denote-directory= set to a directory that has
 denote files, simply run =M-x list-denote= to open the =*Denote*=
