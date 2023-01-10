@@ -111,8 +111,16 @@ list entry following the defined form. Then updates the buffer."
  presented in the *Denote* buffer."
   (mapcar (lambda (entry)
             (let ((id (car entry)))
-              (denote-get-path-by-id id)))
+              (denote-menu-get-path-by-id id)))
           (funcall tabulated-list-entries)))
+
+(defun denote-menu-get-path-by-id (id)
+  "Return absolute path of ID string in `denote-directory-files'."
+  (seq-find
+   (lambda (f)
+     (and (string-prefix-p id (file-name-nondirectory f))))
+   (denote-directory-files)))
+
 
 (defun denote-menu-files-matching-regexp (files regexp)
   "Return list of files matching REGEXP from FILES."
