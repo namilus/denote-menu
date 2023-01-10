@@ -56,17 +56,16 @@ denote file corresponding to the button."
   :group 'denote-menu)
 
 (defcustom denote-menu-initial-regex "."
-  "A regex that is used to initially populate the buffer with
-matching denote files."
+  "Regex used to initially populate the buffer with matching denote files."
   :type 'string
   :group 'denote-menu)
 
 (defvar denote-menu-current-regex denote-menu-initial-regex
   "The current regex used to match denote filenames.")
 
-(defun list-denotes ()
-  "Displays a list of the denote files located in
-`denote-directory'."
+;;;###autoload
+(defun denote-menu-list-notes ()
+  "Display list of Denote files in variable `denote-directory'."
   (interactive)
   (let ((buffer (get-buffer-create "*Denote*")))
     (with-current-buffer buffer
@@ -75,6 +74,9 @@ matching denote files."
       (denote-menu-mode))
     
     (pop-to-buffer-same-window buffer)))
+
+(defalias 'denote-menu-list-notes 'list-denotes
+  "Alias of `denote-menu-list-notes' command.")
 
 (defun denote-menu-update-entries ()
   "Sets `tabulated-list-entries' to a function that maps currently
@@ -99,16 +101,14 @@ list entry following the defined form. Then updates the buffer."
   (revert-buffer))
 
 (defun denote-menu--entries-to-filenames ()
-  "Returns a list of the file names of the Denote files currenty
- presented in the *Denote* buffer."
+  "Return list of file names present in the *Denote* buffer."
   (mapcar (lambda (entry)
             (let ((id (car entry)))
               (file-name-nondirectory (denote-menu-get-path-by-id id))))
           (funcall tabulated-list-entries)))
 
 (defun denote-menu--entries-to-paths ()
-  "Returns a list of the file paths of the Denote files currenty
- presented in the *Denote* buffer."
+  "Return list of file paths present in the *Denote* buffer."
   (mapcar (lambda (entry)
             (let ((id (car entry)))
               (denote-menu-get-path-by-id id)))
@@ -127,8 +127,7 @@ list entry following the defined form. Then updates the buffer."
   (seq-filter (lambda (f) (string-match-p regexp f)) files))
 
 (defun denote-menu--path-to-entry (path)
-  "Converts a denote file PATH to an entry matching the form of
-`tabulated-list-entries'."
+  "Convert PATH to an entry matching the form of `tabulated-list-entries'."
   `(,(denote-retrieve-filename-identifier path)
     [(,(denote-menu-date path) . (action ,(lambda (button) (funcall denote-menu-action path))))
      ,(denote-menu-title path)
@@ -148,45 +147,44 @@ list entry following the defined form. Then updates the buffer."
     (format "%s-%s-%s %s:%s" year month day hour seconds)))
 
 (defun denote-menu-title (path)
-  "If the denote file PATH has no title, returns the string \"(No
-Title)\". Otherwise returns the path's title. Determines whether
-a denote file has a title based on the following rule derived from the file naming scheme:
+  "Return title of PATH.
+If the denote file PATH has no title, return the string \"(No
+Title)\".  Otherwise return PATH's title.
+
+Determine whether a denote file has a title based on the
+following rule derived from the file naming scheme:
 
 1. If the path does not have a \"--\", it has no title."
   (if (or (not (string-match-p "--" path)))
       (propertize "(No Title)" 'face 'font-lock-comment-face)
     (denote-retrieve-filename-title path)))
 
-(defun denote-menu-filter ()
-  "Prompts for a regex and filters the `tabulated-list-entries' with
-denote files that match and reverts the *Denotes* buffer to
-reflect the
-changes."
-  (interactive)
-  (setq denote-menu-current-regex (read-regexp "Filter regex: "))
+(defun denote-menu-filter (regexp)
+  "Filter `tabulated-list-entries' matching REGEXP.
+When called interactively, prompt for REGEXP.
+
+Revert the *Denotes* buffer to include only the matching entries."
+  (interactive (list (read-regexp "Filter regex: ")))
+  (setq denote-menu-current-regex regexp)
   (denote-menu-update-entries))
 
-(defun denote-menu-filter-by-keyword ()
-  "Prompts for keywords and filters the list for denote files tagged
-with the input keywords."
-  (interactive)
-  (let* ((keywords (denote-keywords-prompt))
-         (regex (concat "\\(" (mapconcat (lambda (keyword) (format "_%s" keyword)) keywords "\\|") "\\)")))
+(defun denote-menu-filter-by-keyword (keywords)
+  "Prompt for KEYWORDS and filters the list accordingly.
+When called from Lisp, KEYWORDS is a list of strings."
+  (interactive (list (denote-keywords-prompt)))
+  (let ((regex (concat "\\(" (mapconcat (lambda (keyword) (format "_%s" keyword)) keywords "\\|") "\\)")))
     (setq denote-menu-current-regex regex)
     (denote-menu-update-entries)))
     
 (defun denote-menu-clear-filters ()
-  "Resets `denote-menu-current-regex' to be
-`denote-menu-initial-regex' and updates the list."
+  "Reset filters to `denote-menu-initial-regex' and update buffer."
   (interactive)
   (setq denote-menu-current-regex denote-menu-initial-regex)
   (setq tabulated-list-entries nil)
   (denote-menu-update-entries) )
 
 (defun denote-menu-export-to-dired ()
-  "Switches to a dired buffer showing `denote-directory' with the
-currently displayed denote
-files marked."
+  "Switch to variable `denote-directory' and mark filtered *Denotes* files."
   (interactive)
   (let ((files-to-mark (denote-menu--entries-to-filenames)))
     (dired denote-directory)
