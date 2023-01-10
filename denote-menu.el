@@ -75,7 +75,7 @@ denote file corresponding to the button."
     
     (pop-to-buffer-same-window buffer)))
 
-(defalias 'denote-menu-list-notes 'list-denotes
+(defalias 'list-denotes 'denote-menu-list-notes
   "Alias of `denote-menu-list-notes' command.")
 
 (defun denote-menu-update-entries ()

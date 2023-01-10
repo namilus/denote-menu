@@ -15,7 +15,7 @@ tends to clutters the buffer with hyphens and underscores. This
 package aims to declutter your view of your files by making it easy to
 view the 3 main components of denote files, that is their timestamp,
 title, and keywords. Derived from the builtin =tabulated-list-mode=,
-the =*Denote*= buffer that is created with the =list-denote= command
+the =*Denote*= buffer that is created with the =list-denotes= command
 is visually similar to that created by commands like =list-packages=
 and =list-processes=, and provides methods to filter the denote files
 that are shown, as well as exporting to dired with the denote files
@@ -48,7 +48,7 @@ configuration:
 This package requires Denote =v1.2.0= or above.
 * Usage
 Assuming that you have =denote-directory= set to a directory that has
-denote files, simply run =M-x list-denote= to open the =*Denote*=
+denote files, simply run =M-x list-denotes= to open the =*Denote*=
 buffer. You will be presented with a tabulated list of your denote
 files whose filenames match the =denote-menu-initial-regex= regular
 expression. By default this is set to match all denote files in the
