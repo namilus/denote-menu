@@ -21,6 +21,21 @@
 
 ;;; Commentary:
 
+;; `denote-menu' is an extension to the elpa package `denote' and provides
+;; an interface for viewing your denote files that goes beyond using the
+;; standard `dired' emacs command to view your `denote-directory'. Using
+;; dired is a fine method for viewing your denote files (among other
+;; things), however denote's file naming scheme tends to clutters the
+;; buffer with hyphens and underscores. This package aims to declutter your
+;; view of your files by making it easy to view the 3 main components of
+;; denote files, that is their timestamp, title, and keywords. Derived from
+;; the builtin `tabulated-list-mode', the `*Denote*' buffer that is created
+;; with the `list-denotes' command is visually similar to that created by
+;; commands like `list-packages' and `list-processes', and provides methods
+;; to filter the denote files that are shown, as well as exporting to dired
+;; with the denote files that are currently shown for them to be operated
+;; upon further.
+
 ;;; Code:
 
 (require 'tabulated-list)
