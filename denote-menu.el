@@ -75,6 +75,12 @@ denote file corresponding to the button."
   :type 'string
   :group 'denote-menu)
 
+
+(defcustom denote-menu-show-file-type t
+  "Whether to show the denote file type"
+  :type 'boolean
+  :group 'denote-menu)
+
 (defvar denote-menu-current-regex denote-menu-initial-regex
   "The current regex used to match denote filenames.")
 
@@ -118,15 +124,17 @@ list entry following the defined form. Then updates the buffer."
 (defun denote-menu--entries-to-filenames ()
   "Return list of file names present in the *Denote* buffer."
   (mapcar (lambda (entry)
-            (let ((id (car entry)))
-              (file-name-nondirectory (denote-menu-get-path-by-id id))))
+            (let* ((list-entry-identifier (car entry))
+                   (list-entry-denote-identifier (car (split-string list-entry-identifier "-"))))
+              (file-name-nondirectory (denote-menu-get-path-by-id list-entry-denote-identifier))))
           (funcall tabulated-list-entries)))
 
 (defun denote-menu--entries-to-paths ()
   "Return list of file paths present in the *Denote* buffer."
   (mapcar (lambda (entry)
-            (let ((id (car entry)))
-              (denote-menu-get-path-by-id id)))
+            (let* ((list-entry-identifier (car entry))
+                   (list-entry-denote-identifier (car (split-string list-entry-identifier "-"))))
+              (denote-menu-get-path-by-id list-entry-denote-identifier)))
           (funcall tabulated-list-entries)))
 
 (defun denote-menu-get-path-by-id (id)
@@ -141,14 +149,24 @@ list entry following the defined form. Then updates the buffer."
   "Return list of files matching REGEXP from FILES."
   (seq-filter (lambda (f) (string-match-p regexp f)) files))
 
+(defun denote-menu--path-to-unique-identifier (path)
+  "Convert PATH to a unique identifier to be used for
+`tabulated-list-entries'. Done by taking the denote identifier of
+PATH and appending the filename extension."
+  (let ((path-identifier (denote-retrieve-filename-identifier path))
+        (extension (file-name-extension path)))
+    (format "%s-%s" path-identifier extension)))
+
+
 (defun denote-menu--path-to-entry (path)
   "Convert PATH to an entry matching the form of `tabulated-list-entries'."
-  `(,(denote-retrieve-filename-identifier path)
+  `(,(denote-menu--path-to-unique-identifier path)
     [(,(denote-menu-date path) . (action ,(lambda (button) (funcall denote-menu-action path))))
      ,(denote-menu-title path)
      ,(propertize (format "%s" (denote-extract-keywords-from-path path)) 'face 'italic)]))
   
 (defun denote-menu-date (path)
+  "Return human readable date from denote PATH identifier."
   (let* ((timestamp (split-string (denote-retrieve-filename-identifier path) "T"))
          (date (car timestamp))
          (year (substring date 0 4))
@@ -161,6 +179,11 @@ list entry following the defined form. Then updates the buffer."
                   
     (format "%s-%s-%s %s:%s" year month day hour seconds)))
 
+
+(defun denote-menu-type (path)
+  "Return file type of PATH"
+  (file-name-extension (file-name-nondirectory path)))  
+
 (defun denote-menu-title (path)
   "Return title of PATH.
 If the denote file PATH has no title, return the string \"(No
@@ -170,9 +193,14 @@ Determine whether a denote file has a title based on the
 following rule derived from the file naming scheme:
 
 1. If the path does not have a \"--\", it has no title."
-  (if (or (not (string-match-p "--" path)))
-      (propertize "(No Title)" 'face 'font-lock-comment-face)
-    (denote-retrieve-filename-title path)))
+  
+  (let* ((title (if (or (not (string-match-p "--" path)))
+                   (propertize "(No Title)" 'face 'font-lock-comment-face)
+                  (denote-retrieve-filename-title path)))
+         (file-type (propertize (concat "." (denote-menu-type path)) 'face 'font-lock-keyword-face)))
+    (if denote-menu-show-file-type
+        (concat title " " file-type)
+      title)))
 
 (defun denote-menu-filter (regexp)
   "Filter `tabulated-list-entries' matching REGEXP.
@@ -182,6 +210,11 @@ Revert the *Denotes* buffer to include only the matching entries."
   (interactive (list (read-regexp "Filter regex: ")))
   (setq denote-menu-current-regex regexp)
   (denote-menu-update-entries))
+
+;; (defun denote-menu-filter-by-type (type)
+;;   "Prompt for TYPE and filters the list according to the denote
+;;  file extension"
+;;   (interactive
 
 (defun denote-menu-filter-by-keyword (keywords)
   "Prompt for KEYWORDS and filters the list accordingly.

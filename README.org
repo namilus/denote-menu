@@ -3,8 +3,6 @@
 #+email: sulimanm@tcd.ie
 #+language: en
 #+options: ':t toc:nil author:t email:t num:t
-#+macro: stable-version 1.0.0
-#+macro: release-date 2022-12-16
 
 * Overview
 =denote-menu= provides an interface for viewing your denote files that
@@ -122,6 +120,8 @@ The user options for =denote-menu= are:
 - =denote-menu-keywords-column-width= :: A number value for the width
   of the keywords column. Defaults to 30. This value is irrelevant as
   it is the final column and will take up the remaining width of the buffer.
+- =denote-menu-show-file-type= :: If non-nil, appends the file type of
+  the current denote file to the title.
 - =denote-menu-initial-regex= :: A string that is the regular
   expression that is used to initially populate the =*Denote*= buffer
   with matching entries. This could allow for potential workflows such
