@@ -34,14 +34,13 @@ which allows for further action on denote files beyond just viewing and
 filtering them.
 
 * Installation
-=denote-menu= is not yet on any of the package archives. To install,
-simply clone this repository and add the following to your emacs
-configuration:
+=denote-menu= is available on the GNU ELPA package archive. To install,
+simply run
 
-#+begin_src emacs-lisp
-(add-to-list 'load-path "~/path/to/cloned/denote-menu/")
-(require 'denote-menu)
-#+end_src
+#+begin_example
+M-x package-install RET denote-menu RET
+#+end_example
+
 
 This package requires Denote =v1.2.0= or above.
 * Usage
