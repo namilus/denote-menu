@@ -2,6 +2,7 @@
 
 ;; Author: Mohamed Suliman <sulimanm@tcd.ie>
 ;; Version: 1.0.0
+;; URL: https://github.com/namilus/denote-menu
 ;; Package-Requires: ((emacs "28.1") (denote "1.2.0"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -101,9 +102,9 @@ denote file corresponding to the button."
 
 (defun denote-menu-update-entries ()
   "Sets `tabulated-list-entries' to a function that maps currently
-displayed denote file names
-matching the value of `denote-menu-current-regex' to a tabulated
-list entry following the defined form. Then updates the buffer."
+displayed denote file names matching the value of
+`denote-menu-current-regex' to a tabulated list entry following
+the defined form. Then updates the buffer."
   (if tabulated-list-entries
       (progn
         (let
@@ -125,24 +126,33 @@ list entry following the defined form. Then updates the buffer."
   "Return list of file names present in the *Denote* buffer."
   (mapcar (lambda (entry)
             (let* ((list-entry-identifier (car entry))
-                   (list-entry-denote-identifier (car (split-string list-entry-identifier "-"))))
-              (file-name-nondirectory (denote-menu-get-path-by-id list-entry-denote-identifier))))
+                   (list-entry-denote-identifier (car (split-string list-entry-identifier "-")))
+                   (list-entry-denote-file-type  (cadr (split-string list-entry-identifier "-"))))
+              (file-name-nondirectory (denote-menu-get-path-by-id list-entry-denote-identifier
+                                                                  list-entry-denote-file-type))))
           (funcall tabulated-list-entries)))
 
 (defun denote-menu--entries-to-paths ()
   "Return list of file paths present in the *Denote* buffer."
   (mapcar (lambda (entry)
             (let* ((list-entry-identifier (car entry))
-                   (list-entry-denote-identifier (car (split-string list-entry-identifier "-"))))
-              (denote-menu-get-path-by-id list-entry-denote-identifier)))
+                   (list-entry-denote-identifier (car (split-string list-entry-identifier "-")))
+                   (list-entry-denote-file-type  (cadr (split-string list-entry-identifier "-"))))
+              (denote-menu-get-path-by-id list-entry-denote-identifier list-entry-denote-file-type)))
           (funcall tabulated-list-entries)))
 
-(defun denote-menu-get-path-by-id (id)
-  "Return absolute path of ID string in `denote-directory-files'."
-  (seq-find
-   (lambda (f)
-     (and (string-prefix-p id (file-name-nondirectory f))))
-   (denote-directory-files)))
+(defun denote-menu-get-path-by-id (id file-type)
+  "Return absolute path of denote file with ID timestamp and
+FILE-TYPE in `denote-directory-files'."
+  (message "id %s file type %s" id file-type)
+  (let* ((files (denote-directory-files))
+         (file-id-positions (seq-positions files nil
+                                           (lambda (f elt)
+                                             (and (string-prefix-p id (file-name-nondirectory f))))))
+         (matching-files-with-id (seq-map (lambda (n) (nth n files)) file-id-positions)))
+    
+    (car (seq-filter (lambda (f) (string-match-p (concat "\\." file-type) f)) matching-files-with-id))))
+
 
 
 (defun denote-menu-files-matching-regexp (files regexp)
@@ -211,11 +221,6 @@ Revert the *Denotes* buffer to include only the matching entries."
   (setq denote-menu-current-regex regexp)
   (denote-menu-update-entries))
 
-;; (defun denote-menu-filter-by-type (type)
-;;   "Prompt for TYPE and filters the list according to the denote
-;;  file extension"
-;;   (interactive
-
 (defun denote-menu-filter-by-keyword (keywords)
   "Prompt for KEYWORDS and filters the list accordingly.
 When called from Lisp, KEYWORDS is a list of strings."
@@ -232,7 +237,8 @@ When called from Lisp, KEYWORDS is a list of strings."
   (denote-menu-update-entries) )
 
 (defun denote-menu-export-to-dired ()
-  "Switch to variable `denote-directory' and mark filtered *Denotes* files."
+  "Switch to variable `denote-directory' and mark filtered *Denotes*
+files."
   (interactive)
   (let ((files-to-mark (denote-menu--entries-to-filenames)))
     (dired denote-directory)
