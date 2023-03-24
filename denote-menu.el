@@ -144,7 +144,6 @@ the defined form. Then updates the buffer."
 (defun denote-menu-get-path-by-id (id file-type)
   "Return absolute path of denote file with ID timestamp and
 FILE-TYPE in `denote-directory-files'."
-  (message "id %s file type %s" id file-type)
   (let* ((files (denote-directory-files))
          (file-id-positions (seq-positions files nil
                                            (lambda (f elt)
