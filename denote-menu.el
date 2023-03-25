@@ -1,5 +1,7 @@
 ;;; denote-menu.el --- View denote files in a tabulated list. -*- lexical-binding: t -*-
 
+;; Copyright (C) 2022-2023  Free Software Foundation, Inc.
+
 ;; Author: Mohamed Suliman <sulimanm@tcd.ie>
 ;; Version: 1.1.0
 ;; URL: https://github.com/namilus/denote-menu
