@@ -1,7 +1,7 @@
 ;;; denote-menu.el --- View denote files in a tabulated list. -*- lexical-binding: t -*-
 
 ;; Author: Mohamed Suliman <sulimanm@tcd.ie>
-;; Version: 1.0.0
+;; Version: 1.1.0
 ;; URL: https://github.com/namilus/denote-menu
 ;; Package-Requires: ((emacs "28.1") (denote "1.2.0"))
 

@@ -1,0 +1,13 @@
+-*- mode: org;-*-
+
+* Version 1.1.0
+
+- Added custom user option =denote-menu-show-file-type=.
+- Fixed dired export and menu bugs when when multiple files with the
+  same identifier but different file types (e.g org exports).
+- Fixed =denote-menu-filter= not being interactive.
+
+
+* Version 1.0.0
+
+Initial release

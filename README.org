@@ -142,7 +142,6 @@ A sample user configuration is given below that sets appropriate
 keybindings for the commands described in the previous section:
 
 #+begin_src emacs-lisp
-(add-to-list 'load-path "~/projects/denote-menu/")
 (require 'denote-menu)
 
 (global-set-key (kbd "C-c z") #'list-denotes)
