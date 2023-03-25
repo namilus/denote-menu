@@ -4,6 +4,8 @@
 #+language: en
 #+options: ':t toc:nil author:t email:t num:t
 
+#+html: <a href="http://elpa.gnu.org/packages/denote-menu.html"><img alt="GNU ELPA" src="https://elpa.gnu.org/packages/denote-menu.svg"/></a>
+
 * Overview
 =denote-menu= provides an interface for viewing your denote files that
 goes beyond using the standard =dired= emacs command to view your
@@ -32,6 +34,9 @@ providing a simple API to create your own filters, and integrates well
 with dired by providing the =denote-menu-export-to-dired= command,
 which allows for further action on denote files beyond just viewing and
 filtering them.
+
+#+attr_html: :width 750px
+[[file:screenshots/screenshot.png]]
 
 * Installation
 =denote-menu= is available on the GNU ELPA package archive. To install,

@@ -145,14 +145,8 @@ the defined form. Then updates the buffer."
   "Return absolute path of denote file with ID timestamp and
 FILE-TYPE in `denote-directory-files'."
   (let* ((files (denote-directory-files))
-         (file-id-positions (seq-positions files nil
-                                           (lambda (f elt)
-                                             (and (string-prefix-p id (file-name-nondirectory f))))))
-         (matching-files-with-id (seq-map (lambda (n) (nth n files)) file-id-positions)))
-    
+         (matching-files-with-id (seq-filter (lambda (f) (and (string-prefix-p id (file-name-nondirectory f)))) files)))
     (car (seq-filter (lambda (f) (string-match-p (concat "\\." file-type) f)) matching-files-with-id))))
-
-
 
 (defun denote-menu-files-matching-regexp (files regexp)
   "Return list of files matching REGEXP from FILES."
