@@ -1,6 +1,6 @@
 -*- mode: org;-*-
 
-* Version 1.1.0
+* Version 1.1.1
 
 - Added custom user option =denote-menu-show-file-type=.
 - Fixed dired export and menu bugs when when multiple files with the
