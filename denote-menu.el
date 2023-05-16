@@ -44,6 +44,7 @@
 (require 'tabulated-list)
 (require 'denote)
 (require 'dired)
+(require 'seq)
 
 (defgroup denote-menu ()
   "View Denote files"
@@ -220,9 +221,32 @@ Revert the *Denotes* buffer to include only the matching entries."
   "Prompt for KEYWORDS and filters the list accordingly.
 When called from Lisp, KEYWORDS is a list of strings."
   (interactive (list (denote-keywords-prompt)))
-  (let ((regex (concat "\\(" (mapconcat (lambda (keyword) (format "_%s" keyword)) keywords "\\|") "\\)")))
+  (let ((regex (denote-menu--keywords-to-regex keywords)))
     (setq denote-menu-current-regex regex)
     (denote-menu-update-entries)))
+
+(defun denote-menu--keywords-to-regex (keywords)
+  "Converts KEYWORDS into a regex that matches denote files that
+contain at least one of the keywords."
+  (concat "\\(" (mapconcat (lambda (keyword) (format "_%s" keyword)) keywords "\\|") "\\)"))
+
+
+(defun denote-menu-filter-out-keyword (keywords)
+  "Prompt for KEYWORDS and filters out of the list those denote
+files that contain one of the keywords. When called from Lisp,
+ KEYWORDS is a list of strings."
+  (interactive (list (denote-keywords-prompt)))
+  ;; need to get a list of the denote files that do not include the
+  ;; keywords and set tabulated entries to be those.
+  (let* ((regex (denote-menu--keywords-to-regex keywords))
+        (non-matching-files (seq-filter
+                             (lambda (f)
+                               (not (string-match-p regex (denote-get-file-name-relative-to-denote-directory f))))
+                             (denote-menu--entries-to-paths))))
+    (setq tabulated-list-entries
+          (lambda ()
+            (mapcar #'denote-menu--path-to-entry non-matching-files))))
+  (revert-buffer))
     
 (defun denote-menu-clear-filters ()
   "Reset filters to `denote-menu-initial-regex' and update buffer."
