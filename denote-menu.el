@@ -92,6 +92,9 @@ denote file corresponding to the button."
 (defun denote-menu-list-notes ()
   "Display list of Denote files in variable `denote-directory'."
   (interactive)
+  ;; kill any existing *Denote* buffer
+  (when (get-buffer "*Denote*")
+  (kill-buffer "*Denote*"))
   (let ((buffer (get-buffer-create "*Denote*")))
     (with-current-buffer buffer
       (setq buffer-file-coding-system 'utf-8)
