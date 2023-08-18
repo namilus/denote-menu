@@ -95,7 +95,7 @@ denote file corresponding to the button."
   ;; kill any existing *Denote* buffer
   (let ((denote-menu-buffer-name (format "*Denote %s*" denote-directory)))
     (when (get-buffer  denote-menu-buffer-name)
-      (kill-buffer "*Denote*"))
+      (kill-buffer denote-menu-buffer-name))
     (let ((buffer (get-buffer-create denote-menu-buffer-name)))
       (with-current-buffer buffer
         (setq buffer-file-coding-system 'utf-8)
