@@ -5,7 +5,7 @@
 ;; Author: Mohamed Suliman <sulimanm@tcd.ie>
 ;; Version: 1.1.1
 ;; URL: https://github.com/namilus/denote-menu
-;; Package-Requires: ((emacs "28.1") (denote "1.2.0"))
+;; Package-Requires: ((emacs "28.1") (denote "2.0.0"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -55,17 +55,20 @@
   :type 'number
   :group 'denote-menu)
 
+(defcustom denote-menu-signature-column-width 10
+  "Width for the date column."
+  :type 'number
+  :group 'denote-menu)
+
 (defcustom denote-menu-title-column-width 85
   "Width for the title column."
   :type 'number
   :group 'denote-menu)
 
-
 (defcustom denote-menu-keywords-column-width 30
   "Width for the keywords column."
   :type 'number
   :group 'denote-menu)
-
 
 (defcustom denote-menu-action (lambda (path) (find-file path))
   "Function to execute when a denote file button action is
@@ -79,9 +82,13 @@ denote file corresponding to the button."
   :type 'string
   :group 'denote-menu)
 
-
 (defcustom denote-menu-show-file-type t
-  "Whether to show the denote file type"
+  "Whether to show the denote file type."
+  :type 'boolean
+  :group 'denote-menu)
+
+(defcustom denote-menu-show-file-signature nil
+  "Whether to show the denote file signature."
   :type 'boolean
   :group 'denote-menu)
 
@@ -167,13 +174,19 @@ PATH and appending the filename extension."
         (extension (file-name-extension path)))
     (format "%s-%s" path-identifier extension)))
 
-
 (defun denote-menu--path-to-entry (path)
   "Convert PATH to an entry matching the form of `tabulated-list-entries'."
-  `(,(denote-menu--path-to-unique-identifier path)
-    [(,(denote-menu-date path) . (action ,(lambda (button) (funcall denote-menu-action path))))
-     ,(denote-menu-title path)
-     ,(propertize (format "%s" (denote-extract-keywords-from-path path)) 'face 'italic)]))
+  (if denote-menu-show-file-signature
+      `(,(denote-menu--path-to-unique-identifier path)
+        [(,(denote-menu-date path) . (action ,(lambda (button) (funcall denote-menu-action path))))
+         ,(denote-menu-signature path)
+         ,(denote-menu-title path)
+         ,(propertize (format "%s" (denote-extract-keywords-from-path path)) 'face 'italic)])
+
+    `(,(denote-menu--path-to-unique-identifier path)
+        [(,(denote-menu-date path) . (action ,(lambda (button) (funcall denote-menu-action path))))
+         ,(denote-menu-title path)
+         ,(propertize (format "%s" (denote-extract-keywords-from-path path)) 'face 'italic)])))
   
 (defun denote-menu-date (path)
   "Return human readable date from denote PATH identifier."
@@ -189,6 +202,12 @@ PATH and appending the filename extension."
                   
     (format "%s-%s-%s %s:%s" year month day hour seconds)))
 
+(defun denote-menu-signature (path)
+  "Return file signature from denote PATH identifier."
+  (let ((signature (denote-retrieve-filename-signature path)))
+    (if signature
+        signature
+      (propertize " " 'face 'font-lock-comment-face))))
 
 (defun denote-menu-type (path)
   "Return file type of PATH"
@@ -234,7 +253,6 @@ When called from Lisp, KEYWORDS is a list of strings."
 contain at least one of the keywords."
   (concat "\\(" (mapconcat (lambda (keyword) (format "_%s" keyword)) keywords "\\|") "\\)"))
 
-
 (defun denote-menu-filter-out-keyword (keywords)
   "Prompt for KEYWORDS and filters out of the list those denote
 files that contain one of the keywords. When called from Lisp,
@@ -277,9 +295,15 @@ files."
 (define-derived-mode denote-menu-mode tabulated-list-mode "Denote Menu"
   "Major mode for browsing a list of Denote files."
   :interactive nil
-  (setq tabulated-list-format `[("Date" ,denote-menu-date-column-width t)
-                                ("Title" ,denote-menu-title-column-width nil)
-                                ("Keywords" ,denote-menu-keywords-column-width nil)])
+  (if denote-menu-show-file-signature
+      (setq tabulated-list-format `[("Date" ,denote-menu-date-column-width t)
+                                    ("Signature" ,denote-menu-signature-column-width nil)
+                                    ("Title" ,denote-menu-title-column-width nil)
+                                    ("Keywords" ,denote-menu-keywords-column-width nil)])
+
+    (setq tabulated-list-format `[("Date" ,denote-menu-date-column-width t)
+                                  ("Title" ,denote-menu-title-column-width nil)
+                                  ("Keywords" ,denote-menu-keywords-column-width nil)]))
 
   (denote-menu-update-entries)
   (setq tabulated-list-sort-key '("Date" . t))
