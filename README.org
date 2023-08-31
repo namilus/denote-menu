@@ -120,10 +120,8 @@ buffer already marked.
 The user options for =denote-menu= are:
 - =denote-menu-date-column-width= :: A number value for the width of
   the date column. Defaults to 17.
-
 - =denote-menu-signature-column-width= :: A number value for the width
   of the signature column. Defaults to 10.
-  
 - =denote-menu-title-column-width= :: A number value for the width of
   the title column. Defaults to 85.
 - =denote-menu-keywords-column-width= :: A number value for the width
@@ -131,6 +129,8 @@ The user options for =denote-menu= are:
   it is the final column and will take up the remaining width of the buffer.
 - =denote-menu-show-file-type= :: If non-nil, appends the file type of
   the current denote file to the title.
+- =denote-menu-show-file-signature= :: If non-nil, the column for file
+  signature is added.
 - =denote-menu-initial-regex= :: A string that is the regular
   expression that is used to initially populate the =*Denote*= buffer
   with matching entries. This could allow for potential workflows such
