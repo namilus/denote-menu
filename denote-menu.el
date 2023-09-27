@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023  Free Software Foundation, Inc.
 
 ;; Author: Mohamed Suliman <sulimanm@tcd.ie>
-;; Version: 1.1.1
+;; Version: 1.2.0
 ;; URL: https://github.com/namilus/denote-menu
 ;; Package-Requires: ((emacs "28.1") (denote "2.0.0"))
 
