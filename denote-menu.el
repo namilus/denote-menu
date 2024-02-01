@@ -35,7 +35,7 @@
 ;; the builtin `tabulated-list-mode', the `*Denote*' buffer that is created
 ;; with the `list-denotes' command is visually similar to that created by
 ;; commands like `list-packages' and `list-processes', and provides methods
-;; to filter the denote files that are shown, as well as exporting to dired
+;; To filter the denote files that are shown, as well as exporting to dired
 ;; with the denote files that are currently shown for them to be operated
 ;; upon further.
 
@@ -108,7 +108,7 @@ denote file corresponding to the button."
         (setq buffer-file-coding-system 'utf-8)
         (setq denote-menu-current-regex denote-menu-initial-regex)
         (denote-menu-mode))
-    
+
       (pop-to-buffer-same-window buffer))))
 
 (defalias 'list-denotes 'denote-menu-list-notes
@@ -187,7 +187,7 @@ PATH and appending the filename extension."
         [(,(denote-menu-date path) . (action ,(lambda (button) (funcall denote-menu-action path))))
          ,(denote-menu-title path)
          ,(propertize (format "%s" (denote-extract-keywords-from-path path)) 'face 'italic)])))
-  
+
 (defun denote-menu-date (path)
   "Return human readable date from denote PATH identifier."
   (let* ((timestamp (split-string (denote-retrieve-filename-identifier path) "T"))
@@ -195,11 +195,11 @@ PATH and appending the filename extension."
          (year (substring date 0 4))
          (month (substring date 4 6))
          (day (substring date 6 8))
-               
+
          (time (cadr timestamp))
          (hour (substring time 0 2))
          (seconds (substring time 2 4)))
-                  
+
     (format "%s-%s-%s %s:%s" year month day hour seconds)))
 
 (defun denote-menu-signature (path)
@@ -211,7 +211,7 @@ PATH and appending the filename extension."
 
 (defun denote-menu-type (path)
   "Return file type of PATH"
-  (file-name-extension (file-name-nondirectory path)))  
+  (file-name-extension (file-name-nondirectory path)))
 
 (defun denote-menu-title (path)
   "Return title of PATH.
@@ -222,7 +222,7 @@ Determine whether a denote file has a title based on the
 following rule derived from the file naming scheme:
 
 1. If the path does not have a \"--\", it has no title."
-  
+
   (let* ((title (if (or (not (string-match-p "--" path)))
                    (propertize "(No Title)" 'face 'font-lock-comment-face)
                   (denote-retrieve-filename-title path)))
@@ -269,7 +269,7 @@ files that contain one of the keywords. When called from Lisp,
           (lambda ()
             (mapcar #'denote-menu--path-to-entry non-matching-files))))
   (revert-buffer))
-    
+
 (defun denote-menu-clear-filters ()
   "Reset filters to `denote-menu-initial-regex' and update buffer."
   (interactive)
@@ -295,6 +295,17 @@ files."
 (define-derived-mode denote-menu-mode tabulated-list-mode "Denote Menu"
   "Major mode for browsing a list of Denote files."
   :interactive nil
+  ;; Filtering
+  (define-key denote-menu-mode-map (kbd "f") 'denote-menu-filter)
+  (define-key denote-menu-mode-map (kbd "/") 'denote-menu-filter)
+  (define-key denote-menu-mode-map (kbd "c") 'denote-menu-clear-filters)
+  (define-key denote-menu-mode-map (kbd "k") 'denote-menu-filter-by-keyword)
+  (define-key denote-menu-mode-map (kbd "o") 'denote-menu-filter-out-keyword)
+  (define-key denote-menu-mode-map (kbd "c") 'denote-menu-clear-filters)
+
+  ;; Exporting
+  (define-key denote-menu-mode-map (kbd "e") 'denote-menu-export-to-dired)
+
   (if denote-menu-show-file-signature
       (setq tabulated-list-format `[("Date" ,denote-menu-date-column-width t)
                                     ("Signature" ,denote-menu-signature-column-width nil)
