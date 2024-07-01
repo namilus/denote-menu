@@ -131,7 +131,7 @@ the defined form. Then updates the buffer."
     (setq tabulated-list-entries
           (lambda ()
             (let ((matching-denote-files
-                   (denote-directory-files-matching-regexp denote-menu-current-regex)))
+                   (denote-directory-files denote-menu-current-regex)))
               (mapcar #'denote-menu--path-to-entry matching-denote-files)))))
 
   (revert-buffer))
