@@ -5,7 +5,7 @@
 ;; Author: Mohamed Suliman <sulimanm@tcd.ie>
 ;; Version: 1.2.0
 ;; URL: https://github.com/namilus/denote-menu
-;; Package-Requires: ((emacs "28.1") (denote "2.0.0"))
+;; Package-Requires: ((emacs "28.1") (denote "3.0.0"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -225,7 +225,7 @@ following rule derived from the file naming scheme:
   
   (let* ((title (if (or (not (string-match-p "--" path)))
                    (propertize "(No Title)" 'face 'font-lock-comment-face)
-                  (denote-retrieve-filename-title path)))
+                  (string-replace "-" " " (denote-retrieve-filename-title path))))
          (file-type (propertize (concat "." (denote-menu-type path)) 'face 'font-lock-keyword-face)))
     (if denote-menu-show-file-type
         (concat title " " file-type)
