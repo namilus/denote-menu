@@ -99,17 +99,24 @@ denote file corresponding to the button."
 (defun denote-menu-list-notes ()
   "Display list of Denote files in variable `denote-directory'."
   (interactive)
-  ;; kill any existing *Denote* buffer
-  (let ((denote-menu-buffer-name (format "*Denote %s*" denote-directory)))
-    (when (get-buffer  denote-menu-buffer-name)
-      (kill-buffer denote-menu-buffer-name))
-    (let ((buffer (get-buffer-create denote-menu-buffer-name)))
-      (with-current-buffer buffer
-        (setq buffer-file-coding-system 'utf-8)
-        (setq denote-menu-current-regex denote-menu-initial-regex)
-        (denote-menu-mode))
-    
-      (pop-to-buffer-same-window buffer))))
+
+  ;; We need to get the value of `denote-directory' and save it, since
+  ;; the user might have it set to a buffer-local variable, and
+  ;; creating a new buffer will not save that information.
+  (let ((denote-menu-buffer-name (format "*Denote %s*" denote-directory))
+        (local-denote-directory denote-directory))
+    ;; pop to buffer if already open
+    (if (get-buffer  denote-menu-buffer-name)
+      (pop-to-buffer-same-window denote-menu-buffer-name)
+
+      (let ((buffer (get-buffer-create denote-menu-buffer-name)))
+        (with-current-buffer buffer
+          (setq buffer-file-coding-system 'utf-8)
+          (setq denote-menu-current-regex denote-menu-initial-regex)
+          (denote-menu-mode)
+          (setq-local denote-directory local-denote-directory)
+          (denote-menu-update-entries))
+        (pop-to-buffer-same-window buffer)))))
 
 (defalias 'list-denotes 'denote-menu-list-notes
   "Alias of `denote-menu-list-notes' command.")
@@ -275,7 +282,7 @@ files that contain one of the keywords. When called from Lisp,
   (interactive)
   (setq denote-menu-current-regex denote-menu-initial-regex)
   (setq tabulated-list-entries nil)
-  (denote-menu-update-entries) )
+  (denote-menu-update-entries))
 
 (defun denote-menu-export-to-dired ()
   "Switch to variable `denote-directory' and mark filtered *Denotes*
@@ -305,7 +312,7 @@ files."
                                   ("Title" ,denote-menu-title-column-width nil)
                                   ("Keywords" ,denote-menu-keywords-column-width nil)]))
 
-  (denote-menu-update-entries)
+
   (setq tabulated-list-sort-key '("Date" . t))
   (tabulated-list-init-header)
   (tabulated-list-print))
