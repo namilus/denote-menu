@@ -1,5 +1,8 @@
 -*- mode: org;-*-
 
+* Version 1.4.0
+- Fixes for denote silos.
+
 * Version 1.3.0
 - Compatibility fixes for denote version 3
 
