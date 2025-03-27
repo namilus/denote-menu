@@ -222,17 +222,19 @@ PATH and appending the filename extension."
 
 (defun denote-menu-title (path)
   "Return title of PATH.
-If the denote file PATH has no title, return the string \"(No
-Title)\".  Otherwise return PATH's title.
 
-Determine whether a denote file has a title based on the
-following rule derived from the file naming scheme:
+If the denote file PATH has no title, return the string \"(No Title)\".
+Otherwise return PATH's title retrieved from the front matter or from
+the file name.
+
+Determine whether a denote file has a title based on the following rule
+derived from the file naming scheme:
 
 1. If the path does not have a \"--\", it has no title."
-  
   (let* ((title (if (or (not (string-match-p "--" path)))
-                   (propertize "(No Title)" 'face 'font-lock-comment-face)
-                  (string-replace "-" " " (denote-retrieve-filename-title path))))
+                    (propertize "(No Title)" 'face 'font-lock-comment-face)
+                  (or (denote-retrieve-title-value path (denote-filetype-heuristics path))
+                      (string-replace "-" " " (denote-retrieve-filename-title path)))))
          (file-type (propertize (concat "." (denote-menu-type path)) 'face 'font-lock-keyword-face)))
     (if denote-menu-show-file-type
         (concat title " " file-type)
