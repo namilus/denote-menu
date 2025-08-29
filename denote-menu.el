@@ -130,67 +130,47 @@ the defined form. Then updates the buffer."
       (progn
         (let
             ((current-entry-paths (denote-menu--entries-to-paths)))
-          (setq tabulated-list-entries
-                (lambda ()
-                  (let ((matching-denote-files
-                         (denote-menu-files-matching-regexp current-entry-paths denote-menu-current-regex)))
-                    (mapcar #'denote-menu--path-to-entry matching-denote-files))))))
-    (setq tabulated-list-entries
-          (lambda ()
-            (let ((matching-denote-files
-                   (denote-directory-files denote-menu-current-regex)))
-              (mapcar #'denote-menu--path-to-entry matching-denote-files)))))
+          (let ((matching-denote-files
+                 (denote-menu-files-matching-regexp current-entry-paths denote-menu-current-regex)))
+                    (setq tabulated-list-entries (mapcar #'denote-menu--path-to-entry matching-denote-files)))))
+
+    (let ((matching-denote-files
+           (denote-directory-files denote-menu-current-regex)))
+      (setq tabulated-list-entries (mapcar #'denote-menu--path-to-entry matching-denote-files))))
 
   (revert-buffer))
+
+
 
 (defun denote-menu--entries-to-filenames ()
   "Return list of file names present in the *Denote* buffer."
   (mapcar (lambda (entry)
-            (let* ((list-entry-identifier (car entry))
-                   (list-entry-denote-identifier (car (split-string list-entry-identifier "-")))
-                   (list-entry-denote-file-type  (cadr (split-string list-entry-identifier "-"))))
-              (file-name-nondirectory (denote-menu-get-path-by-id list-entry-denote-identifier
-                                                                  list-entry-denote-file-type))))
-          (funcall tabulated-list-entries)))
+            (file-name-nondirectory (car entry)))
+          tabulated-list-entries))
 
 (defun denote-menu--entries-to-paths ()
   "Return list of file paths present in the *Denote* buffer."
   (mapcar (lambda (entry)
-            (let* ((list-entry-identifier (car entry))
-                   (list-entry-denote-identifier (car (split-string list-entry-identifier "-")))
-                   (list-entry-denote-file-type  (cadr (split-string list-entry-identifier "-"))))
-              (denote-menu-get-path-by-id list-entry-denote-identifier list-entry-denote-file-type)))
-          (funcall tabulated-list-entries)))
+            (car entry))
+          tabulated-list-entries))
 
-(defun denote-menu-get-path-by-id (id file-type)
-  "Return absolute path of denote file with ID timestamp and
-FILE-TYPE in `denote-directory-files'."
-  (let* ((files (denote-directory-files))
-         (matching-files-with-id (seq-filter (lambda (f) (and (string-prefix-p id (file-name-nondirectory f)))) files)))
-    (car (seq-filter (lambda (f) (string-match-p (concat "\\." file-type) f)) matching-files-with-id))))
 
 (defun denote-menu-files-matching-regexp (files regexp)
   "Return list of files matching REGEXP from FILES."
   (seq-filter (lambda (f) (string-match-p regexp f)) files))
 
-(defun denote-menu--path-to-unique-identifier (path)
-  "Convert PATH to a unique identifier to be used for
-`tabulated-list-entries'. Done by taking the denote identifier of
-PATH and appending the filename extension."
-  (let ((path-identifier (denote-retrieve-filename-identifier path))
-        (extension (file-name-extension path)))
-    (format "%s-%s" path-identifier extension)))
+
 
 (defun denote-menu--path-to-entry (path)
   "Convert PATH to an entry matching the form of `tabulated-list-entries'."
   (if denote-menu-show-file-signature
-      `(,(denote-menu--path-to-unique-identifier path)
+      `(,path
         [(,(denote-menu-date path) . (action ,(lambda (button) (funcall denote-menu-action path))))
          ,(denote-menu-signature path)
          ,(denote-menu-title path)
          ,(propertize (format "%s" (denote-extract-keywords-from-path path)) 'face 'italic)])
 
-    `(,(denote-menu--path-to-unique-identifier path)
+    `(,path
         [(,(denote-menu-date path) . (action ,(lambda (button) (funcall denote-menu-action path))))
          ,(denote-menu-title path)
          ,(propertize (format "%s" (denote-extract-keywords-from-path path)) 'face 'italic)])))
@@ -273,8 +253,7 @@ files that contain one of the keywords. When called from Lisp,
                                (not (string-match-p regex (denote-get-file-name-relative-to-denote-directory f))))
                              (denote-menu--entries-to-paths))))
     (setq tabulated-list-entries
-          (lambda ()
-            (mapcar #'denote-menu--path-to-entry non-matching-files))))
+          (mapcar #'denote-menu--path-to-entry non-matching-files)))
   (revert-buffer))
     
 (defun denote-menu-clear-filters ()
@@ -288,16 +267,10 @@ files that contain one of the keywords. When called from Lisp,
   "Switch to variable `denote-directory' and mark filtered *Denotes*
 files."
   (interactive)
-  (let ((files-to-mark (denote-menu--entries-to-filenames)))
-    (dired denote-directory)
-    (revert-buffer)
-    (dired-unmark-all-marks)
-    (dired-mark-if
-     (and (not (looking-at-p dired-re-dot))
-	  (not (eolp))			; empty line
-	  (let ((fn (dired-get-filename t t)))
-            (and fn (member fn files-to-mark))))
-     "matching file")))
+  (if-let* ((files (denote-menu--entries-to-filenames))
+            (default-directory (denote-directory)))
+      (dired (cons default-directory files))
+    (user-error "No files to export")))
 
 (define-derived-mode denote-menu-mode tabulated-list-mode "Denote Menu"
   "Major mode for browsing a list of Denote files."
